@@ -23,7 +23,6 @@ df[f'{source}_2'] =   (df[source]
                        .str.replace(r'[^\w\s]', '', regex=True) #remove punc
                        .str.replace(r'\d+', '', regex=True) #remove number digits
                        .str.replace('/\s\s+/g', ' ', regex=True)) # no double white space, newlines, tabs
-                       
 
 # subset performs operation on specified columns only (normalised column)
 df.drop_duplicates(subset=[f'{source}_2'], inplace=True, keep="first")
@@ -44,7 +43,6 @@ df = (
     .replace("", "EmptyCell")    
 )
    
-
 # filter cells
 df = df[(df[source].str.contains("EmptyCell")==False)]
 df = df[df[source].str.contains('[A-Za-z]')] # remove any string that doesn't contain letters
@@ -78,6 +76,7 @@ if len(df[source]) == len(forQuill[target]) + len(forDeepL[source]):
 else:
     print("MemoQ master and DeepL + Quill splits are NOT of equal length!\n")
 
+# reporting
 print(f"{len(preFiltered)} = Pre-filtered length")
 print(f"{len(postFiltered)} = Post-filtered length")
 print(f"{round((len(preFiltered)-len(postFiltered))/len(preFiltered)*100, 1)}% rows removed")
