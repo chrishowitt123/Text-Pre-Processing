@@ -61,7 +61,7 @@ df.to_excel('memoQOutClean2.xlsx')
 # set character length for split
 splitThreshold = 90
 
-#define splits
+# define splits
 forQuill =df[(df[source].str.len()>=splitThreshold) | (df[source].str.contains(",")) | (df[source].str.contains("\?"))]
 forQuill =forQuill[(forQuill[target] == 'nan')]
 forQuill.to_excel('forQuill.xlsx', index=False)
