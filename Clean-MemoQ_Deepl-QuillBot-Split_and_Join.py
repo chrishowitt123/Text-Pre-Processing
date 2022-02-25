@@ -1,10 +1,16 @@
 import pandas as pd
+
 import os
-os.chdir(r"C:\Users\chris\Documents\Transgola\Clients\PROJECTS\2022\456140222_TM_HS\Orignal\tests") 
+os.chdir(r"C:\Users\chris\Documents\Transgola\Clients\PROJECTS\2022\459250222_TM_HS\Orignal\MemoQ") 
+
+from nltk.corpus import stopwords
+
 
 # choose language pairs
-source = "Portuguese"
-target = "English"
+source = "English"
+target = "Portuguese"
+
+# stop = stopwords.words(source.lower())
 
 df = pd.read_excel(r"MemoQOut.xlsx", names=[source, target])
 
@@ -14,6 +20,7 @@ df = df.astype('str')
 # keep a record of pre-filtered strings
 preFiltered = df[source].tolist()
 
+
 # remove white spaces at begining and end of string
 df[source] = df[source].apply(lambda x: x.strip())
 
@@ -22,7 +29,8 @@ df[f'{source}_2'] =   (df[source]
                        .str.lower()
                        .str.replace(r'[^\w\s]', '', regex=True) #remove punc
                        .str.replace(r'\d+', '', regex=True) #remove number digits
-                       .str.replace('/\s\s+/g', ' ', regex=True)) # no double white space, newlines, tabs
+                       .str.replace('/\s\s+/g', ' ', regex=True) # no double white space, newlines, tabs
+                       .apply(lambda x: ' '.join([word for word in x.split() if word not in (stop)]))) # remove stop words
 
 # subset performs operation on specified columns only (normalised column)
 df.drop_duplicates(subset=[f'{source}_2'], inplace=True, keep="first")
@@ -56,7 +64,7 @@ df = df[(~df[source].str.startswith(("Website", "E-mail", "http", "www.", "Faceb
 postFiltered = df[source].tolist()
 
 # output cleaned (tags), dups removed, filtered version of MemoQ output
-df.to_excel('memoQOutClean2.xlsx')
+df.to_excel('memoQOutClean.xlsx')
 
 # set character length for split
 splitThreshold = 90
@@ -70,6 +78,8 @@ forDeepL =df[(df[source].str.len()<splitThreshold) & (~df[source].str.contains("
 forDeepL =forDeepL[(forDeepL[target] == 'nan')]
 forDeepL.to_excel('forDeepL.xlsx', index=False)
 
+
+# print(total_words_pre)
 # check that the cleaned output has the same amount of rows as the splits combined
 if len(df[source]) == len(forQuill[target]) + len(forDeepL[source]):
     print("MemoQ master and DeepL + Quill splits are of equal length!\n")
@@ -79,10 +89,3 @@ else:
 # reporting
 print(f"{len(preFiltered)} = Pre-filtered length")
 print(f"{len(postFiltered)} = Post-filtered length")
-print(f"{round((len(preFiltered)-len(postFiltered))/len(preFiltered)*100, 1)}% rows removed")
-print("\n")
-print("Removed during filtering\n")
-
-results = set(preFiltered) - set(postFiltered)
-for r in sorted(results,  key=len, reverse=True):
-    print(r+'\n')
