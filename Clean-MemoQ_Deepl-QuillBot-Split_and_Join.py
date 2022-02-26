@@ -28,6 +28,7 @@ df[source] = df[source].apply(lambda x: x.strip())
 df[f'{source}_2'] =   (df[source]
                        .str.lower()
                        .str.replace(r'[^\w\s]', '', regex=True) #remove punc
+                       .apply(lambda x: ' '.join([word for word in x.split() if len(word) > 1]))
                        .apply(lambda x: ' '.join([word for word in x.split() if word not in (stop)])) # remove stop words
                        .apply(lambda x: ' '.join([word for word in x.split() if not any(c.isdigit() for c in word)])) # remove words that contain numbers
                        .str.replace(r'\d+', '', regex=True) #remove number digits
