@@ -1,16 +1,23 @@
 import pandas as pd
 
 import os
-os.chdir(r"C:\Users\chris\Documents\Transgola\Clients\PROJECTS\2022\459250222_TM_HS\Orignal\MemoQ") 
+os.chdir(r"C:\Users\chris\Documents\Transgola\Clients\PROJECTS\2022\463230322_TM_MSF\Orignals\MemoQOut") 
 
 from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+porter=PorterStemmer()
+
+from autocorrect import Speller
+
+
+spell=Speller(lang="en")
 
 
 # choose language pairs
 source = "English"
 target = "Portuguese"
 
-# stop = stopwords.words(source.lower())
+stop = stopwords.words(source.lower())
 
 df = pd.read_excel(r"MemoQOut.xlsx", names=[source, target])
 
@@ -28,9 +35,10 @@ df[source] = df[source].apply(lambda x: x.strip())
 df[f'{source}_2'] =   (df[source]
                        .str.lower()
                        .str.replace(r'[^\w\s]', '', regex=True) #remove punc
-                       .apply(lambda x: ' '.join([word for word in x.split() if len(word) > 1]))
+                       .apply(lambda x: ' '.join([word for word in x.split() if len(word) > 2]))
                        .apply(lambda x: ' '.join([word for word in x.split() if word not in (stop)])) # remove stop words
                        .apply(lambda x: ' '.join([word for word in x.split() if not any(c.isdigit() for c in word)])) # remove words that contain numbers
+                       .apply(lambda x: ' '.join([porter.stem(word) for word in x.split()]))
                        .str.replace(r'\d+', '', regex=True) #remove number digits
                        .str.replace('/\s\s+/g', ' ', regex=True) # no double white space, newlines, tabs
                        )
@@ -54,6 +62,9 @@ df = (
     .replace("", "EmptyCell")    
 )
    
+    
+df[source] = df[source].apply(lambda x: x.replace(r'-', "", 1) if x.startswith('-') else x)    
+    
 # filter cells
 df = df[(df[source].str.contains("EmptyCell")==False)]
 df = df[df[source].str.contains('[A-Za-z]')] # remove any string that doesn't contain letters
@@ -67,7 +78,7 @@ df = df[(~df[source].str.startswith(("Website", "E-mail", "http", "www.", "Faceb
 postFiltered = df[source].tolist()
 
 # output cleaned (tags), dups removed, filtered version of MemoQ output
-df.to_excel('memoQOutClean.xlsx')
+df.to_excel('memoQOutClean.xlsx', index = False)
 
 # set character length for split
 splitThreshold = 90
