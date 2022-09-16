@@ -5,7 +5,7 @@ from nltk.stem import PorterStemmer
 porter=PorterStemmer()
 
 """
-A program that cleans and pre-processes a text document
+A program that cleans and pre-processes a text document.
 
 """
 
